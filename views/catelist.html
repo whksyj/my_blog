@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <title>德德后台管理系统</title>
+  <link rel="stylesheet" href="./assets/layui/css/layui.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="layui-layout layui-layout-admin">
+    {{ include './common/header.html' }}
+
+    {{ include './common/sidebar.html' }}
+
+    <div class="layui-body">
+      <!-- 内容主体区域 -->
+      <div style="padding: 15px;">
+
+        <table class="layui-table" id="cate" lay-filter="cate">
+
+        </table>
+      </div>
+    </div>
+
+    <div class="layui-footer">
+      <!-- 底部固定区域 -->
+      底部固定区域
+    </div>
+  </div>
+
+</body>
+
+<script src="./assets/layui/layui.js"></script>
+<script>
+  //JS 
+  layui.use(['table'], function () {
+    var table = layui.table
+    let $ = layui.$;
+
+
+    //第一个实例
+
+    table.render({
+      elem: '#cate'
+      , url: '/cateData',
+      toolbar: '#cateTool'
+      , cols: [[
+        { field: 'cate_id', width: 80, title: '序号', sort: true }
+        , { field: 'cate_name', width: 100, edit: 'text', title: '分类名称' }
+        , { field: 'orderBy', width: 80, edit: 'text', title: '排序', sort: true }
+        , {
+          fixed: "right", width: 180, title: '操作', templet: (obj) => {
+            return `
+          <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
+          <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+          `
+          }
+        }
+      ]]
+    });
+    //监听单元格编辑
+    table.on('edit(cate)', async function (obj) {
+      const { data } = obj;
+      console.log(obj);
+      const { code, message } = await $.post('/updCateData', data)
+      if (code === 0) {
+        layer.msg(message)
+      }
+
+    });
+
+    table.on('tool(cate)',  function (obj) { //注：tool 是工具条事件名，test 是 table 原始容器的属性 lay-filter="对应的值"
+      var data = obj.data; //获得当前行数据
+      var layEvent = obj.event; //获得 lay-event 对应的值（也可以是表头的 event 参数对应的值）
+      var tr = obj.tr; //获得当前行 tr 的 DOM 对象（如果有的话）
+
+      if (layEvent === 'detail') { //查看
+        //do somehing
+      } else if (layEvent === 'del') { //删除
+        layer.confirm('真的删除行么', function (index) {
+          obj.del(); //删除对应行（tr）的DOM结构，并更新缓存
+          layer.close(index);
+          //向服务端发送删除指令
+          console.log(data);
+          let { cate_id } = data;
+          console.log(cate_id);
+           $.get(`/deleteCateData?cate_id=${cate_id}`)
+        });
+      } else if (layEvent === 'edit') { //编辑
+        //do something
+
+        //同步更新缓存对应的值
+        obj.update({
+          username: '123'
+          , title: 'xxx'
+        });
+      } else if (layEvent === 'LAYTABLE_TIPS') {
+        layer.alert('Hi，头部工具栏扩展的右侧图标。');
+      }
+    });
+
+  });
+</script>
+
+</html>
