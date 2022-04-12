@@ -1,43 +1,195 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <title>德德后台管理系统</title>
+  <title></title>
   <link rel="stylesheet" href="./assets/layui/css/layui.css">
 </head>
+<style>
+  #box {
+    display: flex;
+    justify-content: space-between;
+
+  }
+</style>
+
 <body>
-<div class="layui-layout layui-layout-admin">
-  {{ include './common/header.html' }}
+  <div class="layui-layout layui-layout-admin">
+    {{ include './common/header.html' }}
 
-  {{ include './common/sidebar.html' }}
+    {{ include './common/sidebar.html' }}
 
-  
-  <div class="layui-body">
 
-    <!-- 内容主体区域 -->
-    <div style="padding: 15px;">内容主体区域.</div>
+    <div class="layui-body">
+
+      <!-- 内容主体区域 -->
+      <div style="padding: 15px;">
+
+        <table class="layui-table" id="cate" lay-filter="cate">
+
+        </table>
+        <div id="box">
+          <div id="main" style="width: 600px;height:400px;"></div>
+          <div id="main2" style="width: 600px;height:400px;"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="layui-footer">
+      <!-- 底部固定区域 -->
+      底部固定区域
+    </div>
   </div>
-  
-  <div class="layui-footer">
-    <!-- 底部固定区域 -->
-    底部固定区域
-  </div>
-</div>
-<script src="./assets/layui/layui.js"></script>
-<script>
-//JS 
-layui.use(['element', 'layer', 'util'], function(){
-  var element = layui.element
-  ,layer = layui.layer
-  ,util = layui.util
-  ,$ = layui.$;
-  
-  //头部事件
+
+
+  <script src="./assets/layui/layui.js"></script>
+  <script src="https://cdn.bootcdn.net/ajax/libs/js-cookie/3.0.1/js.cookie.js"></script>
+  <script src="https://cdn.staticfile.org/echarts/4.3.0/echarts.min.js"></script>
+  <script type="text/javascript">
+    //JS 
+    layui.use(['element', 'layer', 'util', 'upload', 'table'], function () {
+      var element = layui.element
+        , layer = layui.layer
+        , util = layui.util
+        , $ = layui.$
+        , table = layui.table;
+      let upload = layui.upload;
+      // table.render({
+      //   elem: '#cate'
+      //   , url: '/getData',
+      //   toolbar: '#cateTool'
+      //   , cols: [[
+      //     { field: 'id', width: 128, title: '序号', sort: true }
+      //     , { field: 'title', width: 170, edit: 'text', title: '文章标题' }
+      //     , { field: 'content', width: 200, edit: 'text', title: '文章内容' }
+      //     , { field: 'author', width: 100, edit: 'text', title: '文章作者' }
+      //     , { field: 'pic', width: 150, edit: 'text', title: '文章价格' }
+      //     , { field: 'add_date', width: 200, edit: 'text', title: '文章更新时间', sort: true }
+      //     , {
+      //       fixed: "right", width: 180, title: '操作', templet: (obj) => {
+      //         return `
+      //     <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
+      //     <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+      //     `
+      //       }
+      //     }
+      //   ]]
+      // });
+
+      $.get('/getGoodsData').then(res => {
+        let goods = [];
+        let sales_volume = [];
+        let price = []
+        for (key in res) {
+          // console.log(res[key]);
+          goods.push(res[key].goods_name)
+          sales_volume.push(res[key].sales_volume)
+          price.push(res[key].price)
+        }
+        // console.log(goods);
+        getGoodsData(goods, price, sales_volume)
+      })
+
+      var chartDom2 = document.getElementById('main2');
+      let myChart2 = echarts.init(chartDom2)
+
+      $.get('/getGoodsData').then(res => {
+        let goods = [];
+        let sales_volume = [];
+        let price = []
+        for (key in res) {
+          let {goods_name,price,sales_volume}= res[key] 
+          // console.log(goods_name,price,sales_volume);
+          goods.push({'value':sales_volume,'name':goods_name})
+        }
+        getGoodsData2(goods)
+      })
+
+      function getGoodsData2(goods, sell, nums) {
+
+
+        option2 = {
+        title: {
+          text: '商品销量表',
+          subtext: 'Fake Data',
+          left: 'center'
+        },
+        tooltip: {
+          trigger: 'item'
+        },
+        legend: {
+          orient: 'vertical',
+          left: 'left'
+        },
+        series: [
+          {
+            name: '销量',
+            type: 'pie',
+            radius: '50%',
+            // data: [
+            //   { value: 1048, name: 'Search Engine' },
+            //   { value: 735, name: 'Direct' },
+            //   { value: 580, name: 'Email' },
+            //   { value: 484, name: 'Union Ads' },
+            //   { value: 300, name: 'Video Ads' }
+            // ],
+            data : goods,
+            emphasis: {
+              // 配置引用部分的
+              itemStyle: {
+                shadowBlur: 10,
+                shadowOffsetX: 0,
+                shadowColor: 'rgba(0, 0, 0, 0.7)'
+              }
+            }
+          }
+        ]
+      };
+      myChart2.setOption(option2);
+
+      }
+
+      function getGoodsData(goods, sell, nums) {
+
+        // console.log(goods, sell,nums);
+
+        let chartDom1 = document.getElementById('main');
+        let myChart1 = echarts.init(chartDom1);
+        var option1 = {
+          title: {
+            text: '商品销量表'
+          },
+          tooltip: {},
+          legend: {
+            data: ['销量']
+          },
+          xAxis: {
+            data: goods
+          },
+          yAxis: {},
+          series: [
+            {
+              name: '销量',
+              type: 'bar',
+              data: nums
+            }
+          ]
+        };
+
+
+        myChart1.setOption(option1);
+
+      }
+
+
 
   
-  
-});
-</script>
+
+
+    });
+  </script>
 </body>
+
 </html>

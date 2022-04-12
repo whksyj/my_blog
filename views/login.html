@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -8,23 +9,53 @@
     <link rel="stylesheet" href="./assets/layui/css/layui.css">
     <link rel="stylesheet" href="./assets/css/login.css">
 </head>
+
 <body>
     <div class="login">
         <h1>小猪博客管理系统</h1>
-        <form method="post">
+        <form method="post" id="loginForm">
             <input type="text" name="username" placeholder="Username" />
-            <input type="password" name="password" placeholder="Password"  />
+            <input type="password" name="password" placeholder="Password" />
             <button type="submit" id="loginBtn" class="btn btn-primary btn-block btn-large">Login In</button>
         </form>
     </div>
 </body>
 <script src="./assets/js/jquery.min.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/js-cookie/3.0.1/js.cookie.js"></script>
 <script src="./assets/layui/layui.js"></script>
 <script>
-    $("#loginBtn").on('click',()=>{
-        layer.msg('login')
-        // document.querySelector('inp')
-        return false;
+
+    layui.use(['table', 'form', 'layer'], function () {
+        var form = layui.form
+        var $ = layui.$
+        var layer = layui.layer
+
+        // 拿到form单的速配有数据
+        $("#loginBtn").on('click', () => {
+            const data = $("#loginForm").serialize()
+            console.log(data);
+            $.post({
+                url: '/toLogin',
+                data
+            }).then(res => {
+                console.log(res);
+                let { status, dataUser } = res;
+                dataUser = JSON.stringify(dataUser);
+                if (status === 2000) {
+                    // Cookies.set('Userinfo', dataUser);
+                    layer.msg('登录成功');
+                        location.href = '/index'
+                        console.log(123);
+                } else {
+                    layer.msg('用户名或者密码不正确');
+                }
+            })
+
+            return false;
+
+        })
+
     })
 </script>
+
 </html>

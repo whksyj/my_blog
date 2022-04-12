@@ -22,11 +22,15 @@
 
     <div class="layui-body">
       <!-- 内容主体区域 -->
+
       <div style="padding: 15px;">
 
         <table class="layui-table" id="cate" lay-filter="cate">
-
+          <button id="add" type="button" class="layui-btn layui-btn-primary  layui-btn-normal">
+            <i class="layui-icon">&#xe654;</i>
+          </button>
         </table>
+
       </div>
     </div>
 
@@ -41,8 +45,9 @@
 <script src="./assets/layui/layui.js"></script>
 <script>
   //JS 
-  layui.use(['table'], function () {
+  layui.use(['table', 'form'], function () {
     var table = layui.table
+    var form = layui.form
     let $ = layui.$;
 
 
@@ -77,7 +82,7 @@
 
     });
 
-    table.on('tool(cate)',  function (obj) { //注：tool 是工具条事件名，test 是 table 原始容器的属性 lay-filter="对应的值"
+    table.on('tool(cate)', function (obj) { //注：tool 是工具条事件名，test 是 table 原始容器的属性 lay-filter="对应的值"
       var data = obj.data; //获得当前行数据
       var layEvent = obj.event; //获得 lay-event 对应的值（也可以是表头的 event 参数对应的值）
       var tr = obj.tr; //获得当前行 tr 的 DOM 对象（如果有的话）
@@ -86,26 +91,84 @@
         //do somehing
       } else if (layEvent === 'del') { //删除
         layer.confirm('真的删除行么', function (index) {
-          obj.del(); //删除对应行（tr）的DOM结构，并更新缓存
+          obj.del();
+          //删除对应行（tr）的DOM结构，并更新缓存
           layer.close(index);
           //向服务端发送删除指令
           console.log(data);
           let { cate_id } = data;
           console.log(cate_id);
-           $.get(`/deleteCateData?cate_id=${cate_id}`)
+          $.get(`/deleteCateData?cate_id=${cate_id}`)
         });
       } else if (layEvent === 'edit') { //编辑
         //do something
 
-        //同步更新缓存对应的值
-        obj.update({
-          username: '123'
-          , title: 'xxx'
-        });
+        // //同步更新缓存对应的值
+        // obj.update({
+        //   username: '123'
+        //   , title: 'xxx'
+        // });
       } else if (layEvent === 'LAYTABLE_TIPS') {
         layer.alert('Hi，头部工具栏扩展的右侧图标。');
       }
     });
+
+
+    if (localStorage.getItem('blogText')) {
+      let val = localStorage.getItem('blogText');
+      $('#headText').html(val);
+      console.log('yes');
+    } else {
+      console.log('no');
+      $.get('/headText').then(res => {
+        let { name, val } = res[0]
+        $('#headText').html(val)
+        localStorage.setItem(name, val);
+      })
+    }
+    $('#add').click(() => {
+      layer.open({
+        content: `
+        <form class="layui-form" id="add_cateform">
+          <div class="layui-form-item">
+            <label class="layui-form-label">cate_name</label>
+            <div class="layui-input-block">
+              <input type="text" id='cate_name' name="cate_name" placeholder="请输入" autocomplete="off" class="layui-input">
+            </div>
+          </div>
+          <div class="layui-form-item">
+            <label class="layui-form-label">oerdyBy</label>
+            <div class="layui-input-block">
+              <input type="text" id='orderBy' name="orderBy" placeholder="请输入" autocomplete="off" class="layui-input">
+            </div>
+          </div>
+        </form>
+          `,
+        btn: ['确定提交', '取消'],
+        btn1:function(index, layero) {
+          //按钮【按钮一】的回调
+        let cate_name = $('#cate_name').val()
+         let  orderBy =  $('#orderBy').val();
+          $.post({
+        url: '/addCateData',
+            data: {cate_name,orderBy}
+          }).then(res => {
+            console.log(res);
+            let { status, messgae } = res;
+            if (status === 2000) {
+              layer.msg(`${messgae}`);
+            } else {
+              layer.msg(`${messgae}`);
+            }
+          })
+          
+        },btn2: function(index) {
+          //按钮【按钮二】的回调
+        }
+
+
+      });
+    })
 
   });
 </script>

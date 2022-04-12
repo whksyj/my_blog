@@ -1,6 +1,6 @@
-const { join } = require('path');
+// const { join } = require('path');
 const path = require('path');
-const { title } = require('process');
+// const { title } = require('process');
 let Cate = {};
 
 // 导入模型
@@ -21,7 +21,7 @@ Cate.cateData = async (req,res) => {
         code :0,
         massage :'success'
     }
-
+    
     res.json(resdata);
 };
 // 数据更改接口
@@ -69,6 +69,39 @@ Cate.deleteCateData = async (req,res) => {
     res.json(rows);
 };
 
+Cate.addCateData = async (req,res) => {
+    let {cate_name, orderBy} = req.body;
+    console.log(orderBy,cate_name);
+    let addSql = `insert into category(cate_id,cate_name,orderBy) values(null,'${cate_name}',${orderBy})`;
 
+    let rows = await query(addSql);
+    console.log(rows);
+
+    let successData = {
+        status:2000,
+        messgae:'addData success'
+    };
+    let failDate = {
+        status:2003,
+        message :'addData fail'
+    }
+
+  
+    let {affectedRows} = rows;
+    if( affectedRows > 0) {
+        res.send(successData)
+    }else{
+        res.send(failDate)
+    }
+}
+
+Cate.headText = async (req,res) => {
+    let haedTxteSql = `select * from system`;
+
+    let rows = await query(haedTxteSql);
+    console.log(rows);
+    
+    res.json(rows)
+}
 
 module.exports = Cate;

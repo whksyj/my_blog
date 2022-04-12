@@ -1,39 +1,213 @@
 <div class="layui-header">
-    <div class="layui-logo layui-hide-xs layui-bg-black">小猪博客管理系统</div>
-    <!-- 头部区域（可配合layui 已有的水平导航） -->
-    <ul class="layui-nav layui-layout-left">
-      <!-- 移动端显示 -->
-      <li class="layui-nav-item layui-show-xs-inline-block layui-hide-sm" lay-header-event="menuLeft">
-        <i class="layui-icon layui-icon-spread-left"></i>
-      </li>
-      <li class="layui-nav-item layui-hide-xs"><a href="">nav 1</a></li>
-      <li class="layui-nav-item layui-hide-xs"><a href="">nav 2</a></li>
-      <li class="layui-nav-item layui-hide-xs"><a href="">nav 3</a></li>
-      <li class="layui-nav-item">
-        <a href="javascript:;">nav groups</a>
-        <dl class="layui-nav-child">
-          <dd><a href="">menu 11</a></dd>
-          <dd><a href="">menu 22</a></dd>
-          <dd><a href="">menu 33</a></dd>
-        </dl>
-      </li>
-    </ul>
-    <ul class="layui-nav layui-layout-right">
-      <li class="layui-nav-item layui-hide layui-show-md-inline-block">
-        <a href="javascript:;">
-          <img src="https://img2.baidu.com/it/u=1012304310,3936720750&fm=26&fmt=auto&gp=0.jpg"  class="layui-nav-img">
-          xiaoluo
-        </a>
-        <dl class="layui-nav-child">
-          <dd><a href="">个人信息</a></dd>
-          <dd><a href="">修改密码</a></dd>
-          <dd><a href="./login.html">退出</a></dd>
-        </dl>
-      </li>
-      <li class="layui-nav-item" lay-header-event="menuRight" lay-unselect>
-        <a href="javascript:;">
-          <i class="layui-icon layui-icon-more-vertical"></i>
-        </a>
-      </li>
-    </ul>
-  </div>
+  <div id="headText" class="layui-logo layui-hide-xs layui-bg-black"></div>
+  <!-- 头部区域（可配合layui 已有的水平导航） -->
+  <ul class="layui-nav layui-layout-left">
+    <!-- 移动端显示 -->
+    <li class="layui-nav-item layui-show-xs-inline-block layui-hide-sm" lay-header-event="menuLeft">
+      <i class="layui-icon layui-icon-spread-left"></i>
+    </li>
+    <li class="layui-nav-item layui-hide-xs"><a href="">nav 1</a></li>
+    <li class="layui-nav-item layui-hide-xs"><a href="">nav 2</a></li>
+    <li class="layui-nav-item layui-hide-xs"><a href="">nav 3</a></li>
+    <li class="layui-nav-item">
+      <a href="javascript:;">nav groups</a>
+      <dl class="layui-nav-child">
+        <dd><a href="">menu 11</a></dd>
+        <dd><a href="">menu 22</a></dd>
+        <dd><a href="">menu 33</a></dd>
+      </dl>
+    </li>
+  </ul>
+  <ul class="layui-nav layui-layout-right">
+    <li class="layui-nav-item layui-hide layui-show-md-inline-block">
+      <a href="javascript:;">
+        <img id="Pic" src="" class="layui-nav-img">
+      </a>
+      <dl id="uesrInfo" class="layui-nav-child">
+        <dd id="updete"><a href="javascript:;">个人信息</a></dd>
+        <dd id=""><a href="javascript:;">修改密码</a></dd>
+        <dd id="outLogin"><a href="javascript:;">退出</a></dd>
+      </dl>
+    </li>
+    <li class="layui-nav-item" lay-header-event="menuRight" lay-unselect>
+      <a href="javascript:;">
+        <i class="layui-icon layui-icon-more-vertical"></i>
+      </a>
+    </li>
+  </ul>
+</div>
+<script src="../../assets/layui/layui.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/js-cookie/3.0.1/js.cookie.js"></script>
+
+<script>
+  layui.use(['table', 'form', 'upload'], function () {
+    var table = layui.table
+    var form = layui.form
+    let $ = layui.$;
+
+
+    if (localStorage.getItem('blogText')) {
+      let val = localStorage.getItem('blogText');
+      $('#headText').html(val);
+      console.log('yes');
+    } else {
+      console.log('no');
+      $.get('/headText').then(res => {
+        let { name, val } = res[0]
+        $('#headText').html(val)
+        localStorage.setItem(name, val);
+      })
+    };
+
+
+    $('#outLogin').on('click', () => {
+      $.post({
+        url: '/loginOut'
+      }).then(res => {
+
+        location.href = '/login'
+      })
+    });
+    //头部事件
+    let userInfo = Cookies.get('userInfo')
+    let { id, username, pic, info } = JSON.parse(userInfo);
+    // console.log(pic);
+    console.log(JSON.parse(userInfo));
+    $('#Pic').attr('src', pic); //图片链接（base64）
+
+    // console.log(12321);
+    let hemlText = `
+        <form class="layui-form" action="" style="padding:20px">
+          <div class="layui-form-item">
+          <label class="layui-form-label">用户名</label>
+            <div class="layui-input-block">
+              <input type="text" name="title" lay-verify="title" disabled autocomplete="off" valeue="" placeholder="${username}" class="layui-input">
+            </div>
+          </div>
+          <div class="layui-upload">
+        <button type="button" class="layui-btn" id="test1">上传图片</button>
+        <div class="layui-upload-list">
+          <img style="width=200px;height=200px" src="${pic}" class="layui-upload-img" id="demo1">
+        <p id="demoText">
+          <div style="width: 95px;">
+          <div class="layui-progress id="demoText" layui-progress-big" lay-showpercent="yes" lay-filter="demo">
+          <div class="layui-progress-bar" lay-percent=""></div>
+          </div>
+        </div>
+       </p>
+        </div>
+        </div> 
+        <div class="layui-form-item layui-form-text">
+          <label class="layui-form-label">普通文本域</label>
+          <div class="layui-input-block">
+            <textarea id='Userinfo' placeholder="请输入内容" class="layui-textarea">${info}</textarea>
+          </div>
+        </div>
+        <div style="text-align:center;">
+                  <button type="button" id="saveUser" class="layui-btn layui-btn-primary layui-border-blue layui-btn-fluid">保存</button>
+        </div>
+      </form>
+  `;
+    $(document).on('click', '#updete', function () {
+      console.log('12');
+      layer.open({
+        title: '修改您的信息',
+        type: 1,
+        area: ['800px', '440px'],
+        content: hemlText,
+        success: function () {
+          let Userinfo = Cookies.get('userInfo');
+          console.log('Userinfo',Userinfo);
+          initUpload();
+          $('#saveUser').on('click', function () {
+            let info = $('#Userinfo').val();
+            $.post({
+              url: '/updateUserInfo',
+              data: { info, id },
+            }).then(res => {
+              console.log(res);
+              let { data } = res;
+              console.log(data);
+              console.log(pic);
+              $('#demo1').attr('src', pic);
+              $('#Pic').attr('src', pic);
+              location.reload();
+            })
+          })
+
+
+
+        },
+
+      });
+      function initUpload() {
+        //常规使用 - 普通图片上传
+        const upload = layui.upload;
+        const element = layui.element;
+        var uploadInst = upload.render({
+          elem: '#test1',
+          url: '/updateUser',//此处用的是第三方的 http 请求演示，实际使用时改成您自己的上传接口即可。
+          // data: formData,
+          before: function (obj) {
+            //预读本地文件示例，不支持ie8
+            obj.preview(function (index, file, result) {
+              file.oldPath = pic
+              console.log(file);
+              // formData.append('avatar',file)
+              $('#demo1').attr('src', result); //图片链接（base64）
+
+            });
+
+            element.progress('demo', '0%'); //进度条复位
+            layer.msg('上传中', {
+              icon: 16,
+              time: 0
+            });
+          },
+
+
+          done: function (res) {
+            //如果上传失败
+            if (res.code > 0) {
+              $('#demoText').html(''); //置空上传失败的状态
+              return layer.msg('上传失败');
+            }
+            //上传成功的一些操作
+            console.log('上传成功', res);
+            let { message, path, data } = res;
+            let { pic } = data;
+            $('#Pic').attr('src', path); //图片链接（base64)
+            return layer.msg(message);
+
+          },
+          error: function () {
+            //演示失败状态，并实现重传
+            var demoText = $('#demoText');
+            demoText.html(
+              '<span style="color: #FF5722;">上传失败</span> <a class="layui-btn layui-btn-xs demo-reload">重试</a>');
+            demoText.find('.demo-reload').on('click', function () {
+              uploadInst.upload();
+            });
+          }
+          //进度条
+          ,
+          progress: function (n, elem, e) {
+            element.progress('demo', n + '%'); //可配合 layui 进度条元素使用
+            if (n == 100) {
+              layer.msg('上传完毕', {
+                icon: 1
+              });
+            }
+          }
+        
+        
+        });
+      }
+    })
+
+
+  });
+
+
+
+</script>
